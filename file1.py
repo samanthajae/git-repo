@@ -1,15 +1,3 @@
-import re
-import pandas as pd
-import numpy as np
-from dataclasses import dataclass
-import math
-import matplotlib
-matplotlib.use("Agg")
-import matplotlib.pyplot as plt
-import folium
-from folium.plugins import MiniMap
-from IPython.display import display
-
 #define function to convert PSA grid coordinates to latitude & longitude based on rules
 
 MINI_GRID_OFFSETS = {
@@ -19,8 +7,6 @@ MINI_GRID_OFFSETS = {
     "D": (+0.7, -0.3),
 }
 
-
-@dataclass
 class GridResult:
     grid: str
     lat_dms: str
@@ -112,6 +98,7 @@ def add_latlon_columns(df, grid_col="B", lat_col="Latitude", lon_col="Longitude"
     out.insert(min(at, out.shape[1]), lat_col, lats)
     out.insert(min(at + 1, out.shape[1]), lon_col, lons)
     return out
+
 
 TILE_URL = "https://tile.openstreetmap.org/{z}/{x}/{y}.png"
 
@@ -208,7 +195,3 @@ def ask_and_map():
     save_map_image(lat, lon, path="map.png", zoom=zoom) #dot_color=color, dot_size=size
     return show_map(lat, lon, label=label, zoom=zoom, html_path="map.html")
                     #dot_color=color, #dot_size=size
-
-
-if __name__ == "__main__":
-    main()
