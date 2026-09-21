@@ -74,9 +74,6 @@ def convert(grid):
         longitude=round(lon_deg + lon_min / 60, 6),
     )
 
-def convert_many(grids):
-    return [convert(g) for g in grids]
-
 
 #define function to convert PSA grid coordinates to latitude & longitude in df
 
@@ -211,3 +208,7 @@ def ask_and_map():
     save_map_image(lat, lon, path="map.png", zoom=zoom) #dot_color=color, dot_size=size
     return show_map(lat, lon, label=label, zoom=zoom, html_path="map.html")
                     #dot_color=color, #dot_size=size
+
+
+if __name__ == "__main__":
+    main()
