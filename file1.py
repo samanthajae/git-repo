@@ -160,15 +160,6 @@ def show_points(points, zoom=None, tiles="OpenStreetMap", html_path=None,
         print(f"Interactive map saved to {html_path}")
     return fmap
 
-
-def save_map_image(lat, lon, path="map.png", zoom=13, width=1000, height=750,
-                   dot_color=DOT_COLOR, dot_size=DOT_SIZE, outline="white",
-                   quality=92, extra_points=None, save_dir=DRIVE_DIR):
-    _validate(lat, lon)
-    ext = os.path.splitext(path)[1].lower()
-    if ext not in {".png", ".jpg", ".jpeg"}:
-        raise ValueError("path must end in .png, .jpg or .jpeg")
-
     smap = StaticMap(width, height, url_template=TILE_URL,
                      headers={"User-Agent": "coordinate-map-notebook/1.0"})
     for plat, plon in [(lat, lon)] + list(extra_points or []):
@@ -176,17 +167,6 @@ def save_map_image(lat, lon, path="map.png", zoom=13, width=1000, height=750,
             smap.add_marker(CircleMarker((plon, plat), outline, dot_size * 2 + 4))  # outline
         smap.add_marker(CircleMarker((plon, plat), dot_color, dot_size * 2))        # dot
     image = smap.render(zoom=zoom)
-
-    if ext == ".png":
-        image.save(path)
-    else:
-        image.convert("RGB").save(path, "JPEG", quality=quality)
-    print(f"Image saved to {os.path.abspath(path)}")
-
-    if save_dir and not os.path.isabs(path):
-        path = os.path.join(save_dir, path)
-
-    os.makedirs(os.path.dirname(os.path.abspath(path)), exist_ok=True)
 
     return path
 
@@ -199,8 +179,6 @@ def _validate(lat, lon):
 def ask_and_map():
     label = input("Label (optional): ").strip() or None
     zoom = int(input("Zoom 1-19 [13]: ") or 13)
-    #color = input(f"Dot colour [{DOT_COLOR}]: ").strip() or DOT_COLOR
-    #size = int(input(f"Dot size (px radius) [{DOT_SIZE}]: ") or DOT_SIZE)
-    save_map_image(lat, lon, path="map.png", zoom=zoom) #dot_color=color, dot_size=size
     return show_map(lat, lon, label=label, zoom=zoom, html_path="map.html")
-                    #dot_color=color, #dot_size=size
+
+
