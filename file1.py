@@ -10,6 +10,7 @@ MINI_GRID_OFFSETS = {
     "D": (+0.7, -0.3),
 }
 
+@dataclass
 class GridResult:
     grid: str
     lat_dms: str
