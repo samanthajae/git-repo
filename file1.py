@@ -103,18 +103,29 @@ def add_latlon_columns(df, grid_col="B", lat_col="Latitude", lon_col="Longitude"
     out.insert(min(at + 1, out.shape[1]), lon_col, lons)
     return out
 
+import folium
+from folium.plugins import MiniMap
+from IPython.display import display
 
-import os
-DRIVE_DIR = "/content/drive/MyDrive/" 
-TILE_URL = "https://tile.openstreetmap.org/{z}/{x}/{y}.png"
-DOT_COLOR = "#d62728"
-DOT_SIZE = 8
+TILE_URL   = "https://tile.openstreetmap.org/{z}/{x}/{y}.png"
+DOT_COLOR  = "#d62728"
+DOT_SIZE   = 8
 
-def show_map(lat, lon, label=None, zoom=13, tiles="OpenStreetMap", html_path=None,
-             dot_color=DOT_COLOR, dot_size=DOT_SIZE, fill_opacity=0.9, outline="white"):
-    """Return an interactive Folium map centred on (lat, lon) with a coloured dot."""
+
+def _validate(lat, lon):
+    if not (-90 <= float(lat) <= 90):
+        raise ValueError(f"Latitude out of range: {lat}")
+    if not (-180 <= float(lon) <= 180):
+        raise ValueError(f"Longitude out of range: {lon}")
+
+
+def show_map(lat, lon, label=None, zoom=13, tiles="OpenStreetMap",
+             dot_color=DOT_COLOR, dot_size=DOT_SIZE, fill_opacity=0.9,
+             outline="white", minimap=True):
+    """Display an interactive map centred on (lat, lon) with a coloured dot."""
     _validate(lat, lon)
-    fmap = folium.Map(location=[lat, lon], zoom_start=zoom, tiles=tiles, control_scale=True)
+    fmap = folium.Map(location=[lat, lon], zoom_start=zoom,
+                      tiles=tiles, control_scale=True)
     folium.CircleMarker(
         [lat, lon],
         radius=dot_size,
@@ -124,23 +135,26 @@ def show_map(lat, lon, label=None, zoom=13, tiles="OpenStreetMap", html_path=Non
         fill_color=dot_color,
         fill_opacity=fill_opacity,
         tooltip=label or f"{lat:.6f}, {lon:.6f}",
-        popup=folium.Popup(f"<b>{label or 'Location'}</b><br>Lat: {lat}<br>Lon: {lon}", max_width=250),
+        popup=folium.Popup(
+            f"<b>{label or 'Location'}</b><br>Lat: {lat}<br>Lon: {lon}",
+            max_width=250),
     ).add_to(fmap)
-    MiniMap(toggle_display=True).add_to(fmap)
-    if html_path:
-        fmap.save(html_path)
-        print(f"Interactive map saved to {html_path}")
+    if minimap:
+        MiniMap(toggle_display=True).add_to(fmap)
+    display(fmap)          # renders inline in Colab
     return fmap
 
-
-def show_points(points, zoom=None, tiles="OpenStreetMap", html_path=None,
-                dot_color=DOT_COLOR, dot_size=DOT_SIZE, fill_opacity=0.9, outline="white"):
+def show_points(points, zoom=None, tiles="OpenStreetMap",
+                dot_color=DOT_COLOR, dot_size=DOT_SIZE, fill_opacity=0.9,
+                outline="white"):
     """points = [(lat, lon, label), ...] -> interactive map with all pins."""
     pts = [(p[0], p[1], p[2] if len(p) > 2 else None) for p in points]
     for lat, lon, _ in pts:
         _validate(lat, lon)
-    center = [sum(p[0] for p in pts) / len(pts), sum(p[1] for p in pts) / len(pts)]
-    fmap = folium.Map(location=center, zoom_start=zoom or 12, tiles=tiles, control_scale=True)
+    center = [sum(p[0] for p in pts) / len(pts),
+              sum(p[1] for p in pts) / len(pts)]
+    fmap = folium.Map(location=center, zoom_start=zoom or 12,
+                      tiles=tiles, control_scale=True)
     for lat, lon, label in pts:
         folium.CircleMarker(
             [lat, lon],
@@ -154,31 +168,14 @@ def show_points(points, zoom=None, tiles="OpenStreetMap", html_path=None,
         ).add_to(fmap)
     if len(pts) > 1 and zoom is None:
         fmap.fit_bounds([[min(p[0] for p in pts), min(p[1] for p in pts)],
-                         [max(p[0] for p in pts), max(p[1] for p in pts)]], padding=(30, 30))
-    if html_path:
-        fmap.save(html_path)
-        print(f"Interactive map saved to {html_path}")
+                         [max(p[0] for p in pts), max(p[1] for p in pts)]],
+                        padding=(30, 30))
+    display(fmap)
     return fmap
 
-    smap = StaticMap(width, height, url_template=TILE_URL,
-                     headers={"User-Agent": "coordinate-map-notebook/1.0"})
-    for plat, plon in [(lat, lon)] + list(extra_points or []):
-        if outline:
-            smap.add_marker(CircleMarker((plon, plat), outline, dot_size * 2 + 4))  # outline
-        smap.add_marker(CircleMarker((plon, plat), dot_color, dot_size * 2))        # dot
-    image = smap.render(zoom=zoom)
-
-    return path
-
-def _validate(lat, lon):
-    if not (-90 <= float(lat) <= 90):
-        raise ValueError(f"Latitude out of range: {lat}")
-    if not (-180 <= float(lon) <= 180):
-        raise ValueError(f"Longitude out of range: {lon}")
-
 def ask_and_map():
+    lat = float(lat.strip())
+    lon = float(lon.strip())
     label = input("Label (optional): ").strip() or None
     zoom = int(input("Zoom 1-19 [13]: ") or 13)
-    return show_map(lat, lon, label=label, zoom=zoom, html_path="map.html")
-
-
+    return show_map(lat, lon, label=label, zoom=zoom)
