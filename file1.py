@@ -1,3 +1,7 @@
+!pip install dataclasses
+!pip install folium
+!pip install staticmap
+
 import re
 import pandas as pd
 import numpy as np
