@@ -103,14 +103,13 @@ def add_latlon_columns(df, grid_col="B", lat_col="Latitude", lon_col="Longitude"
     out.insert(min(at + 1, out.shape[1]), lon_col, lons)
     return out
 
+
 import folium
 from folium.plugins import MiniMap
 from IPython.display import display
 
-TILE_URL   = "https://tile.openstreetmap.org/{z}/{x}/{y}.png"
 DOT_COLOR  = "#d62728"
 DOT_SIZE   = 8
-
 
 def _validate(lat, lon):
     if not (-90 <= float(lat) <= 90):
@@ -118,14 +117,12 @@ def _validate(lat, lon):
     if not (-180 <= float(lon) <= 180):
         raise ValueError(f"Longitude out of range: {lon}")
 
-
-def show_map(lat, lon, label=None, zoom=13, tiles="OpenStreetMap",
+def show_map(lat, lon, label=None, zoom=13, tiles="Esri.WorldStreetMap",
              dot_color=DOT_COLOR, dot_size=DOT_SIZE, fill_opacity=0.9,
              outline="white", minimap=True):
-    """Display an interactive map centred on (lat, lon) with a coloured dot."""
     _validate(lat, lon)
     fmap = folium.Map(location=[lat, lon], zoom_start=zoom,
-                      tiles=tiles, control_scale=True)
+                      tiles="Esri.WorldStreetMap", control_scale=True)
     folium.CircleMarker(
         [lat, lon],
         radius=dot_size,
@@ -144,7 +141,7 @@ def show_map(lat, lon, label=None, zoom=13, tiles="OpenStreetMap",
     display(fmap)          # renders inline in Colab
     return fmap
 
-def show_points(points, zoom=None, tiles="OpenStreetMap",
+def show_points(points, zoom=None, tiles="Esri.WorldStreetMap",
                 dot_color=DOT_COLOR, dot_size=DOT_SIZE, fill_opacity=0.9,
                 outline="white"):
     """points = [(lat, lon, label), ...] -> interactive map with all pins."""
@@ -173,9 +170,6 @@ def show_points(points, zoom=None, tiles="OpenStreetMap",
     display(fmap)
     return fmap
 
+
 def ask_and_map():
-    lat = float(lat.strip())
-    lon = float(lon.strip())
-    label = input("Label (optional): ").strip() or None
-    zoom = int(input("Zoom 1-19 [13]: ") or 13)
-    return show_map(lat, lon, label=label, zoom=zoom)
+    return show_map(lat, lon)
