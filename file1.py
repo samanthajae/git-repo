@@ -1,6 +1,6 @@
-!pip install dataclasses
-!pip install folium
-!pip install staticmap
+%pip install dataclasses
+%pip install folium
+%pip install staticmap
 
 import re
 import pandas as pd
