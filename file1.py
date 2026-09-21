@@ -104,9 +104,10 @@ def add_latlon_columns(df, grid_col="B", lat_col="Latitude", lon_col="Longitude"
     return out
 
 
+import os
+DRIVE_DIR = "/content/drive/MyDrive/" 
 TILE_URL = "https://tile.openstreetmap.org/{z}/{x}/{y}.png"
-
-DOT_COLOR = "#d62728" 
+DOT_COLOR = "#d62728"
 DOT_SIZE = 8
 
 def show_map(lat, lon, label=None, zoom=13, tiles="OpenStreetMap", html_path=None,
@@ -162,8 +163,7 @@ def show_points(points, zoom=None, tiles="OpenStreetMap", html_path=None,
 
 def save_map_image(lat, lon, path="map.png", zoom=13, width=1000, height=750,
                    dot_color=DOT_COLOR, dot_size=DOT_SIZE, outline="white",
-                   quality=92, extra_points=None):
-    """Render a static map image with a coloured dot and save as .png / .jpg / .jpeg."""
+                   quality=92, extra_points=None, save_dir=DRIVE_DIR):
     _validate(lat, lon)
     ext = os.path.splitext(path)[1].lower()
     if ext not in {".png", ".jpg", ".jpeg"}:
@@ -182,8 +182,13 @@ def save_map_image(lat, lon, path="map.png", zoom=13, width=1000, height=750,
     else:
         image.convert("RGB").save(path, "JPEG", quality=quality)
     print(f"Image saved to {os.path.abspath(path)}")
-    return path
 
+    if save_dir and not os.path.isabs(path):
+        path = os.path.join(save_dir, path)
+
+    os.makedirs(os.path.dirname(os.path.abspath(path)), exist_ok=True)
+
+    return path
 
 def _validate(lat, lon):
     if not (-90 <= float(lat) <= 90):
